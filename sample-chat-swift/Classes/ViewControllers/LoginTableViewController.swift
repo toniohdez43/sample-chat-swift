@@ -1,0 +1,149 @@
+//
+//  LoginTableViewController.swift
+//  sample-chat-swift
+//
+//  Created by Anton Sokolchenko on 3/31/15.
+//  Copyright (c) 2015 quickblox. All rights reserved.
+//
+
+import UIKit
+
+/**
+ *  Default test users password
+ */
+let kTestUsersDefaultPassword = "x6Bt0VDy5"
+
+class LoginTableViewController: UsersListTableViewController, NotificationServiceDelegate {
+
+    // MARK: ViewController overrides
+    
+    override func viewDidLoad() {
+		super.viewDidLoad()
+		
+		
+		guard let currentUser = ServicesManager.instance().currentUser() else {
+			return
+		}
+		
+		currentUser.password = kTestUsersDefaultPassword
+		
+		SVProgressHUD.showWithStatus("SA_STR_LOGGING_IN_AS".localized + currentUser.login!, maskType: SVProgressHUDMaskType.Clear)
+		
+		// Logging to Quickblox REST API and chat.
+		ServicesManager.instance().logInWithUser(currentUser, completion: {
+			[weak self] (success:Bool,  errorMessage: String?) -> Void in
+			
+			guard let strongSelf = self else { return }
+			
+			guard success else {
+				SVProgressHUD.showErrorWithStatus(errorMessage)
+				return
+			}
+			
+			strongSelf.registerForRemoteNotification()
+			SVProgressHUD.showSuccessWithStatus("SA_STR_LOGGED_IN".localized)
+			
+			if (ServicesManager.instance().notificationService.pushDialogID != nil) {
+				ServicesManager.instance().notificationService.handlePushNotificationWithDelegate(strongSelf)
+			}
+			else {
+				strongSelf.performSegueWithIdentifier("SA_STR_SEGUE_GO_TO_DIALOGS".localized, sender: nil)
+			}
+			})
+		
+		self.tableView.reloadData()
+    }
+
+    // MARK: NotificationServiceDelegate protocol
+	
+    func notificationServiceDidStartLoadingDialogFromServer() {
+        SVProgressHUD.showWithStatus("SA_STR_LOADING_DIALOG".localized, maskType: SVProgressHUDMaskType.Clear)
+    }
+	
+    func notificationServiceDidFinishLoadingDialogFromServer() {
+        SVProgressHUD.dismiss()
+    }
+    
+    func notificationServiceDidSucceedFetchingDialog(chatDialog: QBChatDialog!) {
+        let dialogsController = self.storyboard?.instantiateViewControllerWithIdentifier("DialogsViewController") as! DialogsViewController
+        let chatController = self.storyboard?.instantiateViewControllerWithIdentifier("ChatViewController") as! ChatViewController
+        chatController.dialog = chatDialog
+
+        self.navigationController?.viewControllers = [dialogsController, chatController]
+    }
+    
+    func notificationServiceDidFailFetchingDialog() {
+        self.performSegueWithIdentifier("SA_STR_SEGUE_GO_TO_DIALOGS".localized, sender: nil)
+    }
+    
+    // MARK: Actions
+	
+	/**
+	Login in chat with user and register for remote notifications
+	
+	- parameter user: QBUUser instance
+	*/
+    func logInChatWithUser(user: QBUUser) {
+        
+        SVProgressHUD.showWithStatus("SA_STR_LOGGING_IN_AS".localized + user.login!, maskType: SVProgressHUDMaskType.Clear)
+
+        // Logging to Quickblox REST API and chat.
+        ServicesManager.instance().logInWithUser(user, completion:{
+            [unowned self] (success:Bool, errorMessage: String?) -> Void in
+
+			guard success else {
+				SVProgressHUD.showErrorWithStatus(errorMessage)
+				return
+			}
+			
+			self.registerForRemoteNotification()
+			self.performSegueWithIdentifier("SA_STR_SEGUE_GO_TO_DIALOGS".localized, sender: nil)
+			SVProgressHUD.showSuccessWithStatus("SA_STR_LOGGED_IN".localized)
+			
+        })
+    }
+	
+    // MARK: Remote notifications
+    
+    func registerForRemoteNotification() {
+        // Register for push in iOS 8
+        if #available(iOS 8.0, *) {
+            let settings = UIUserNotificationSettings(forTypes: [UIUserNotificationType.Alert, UIUserNotificationType.Badge, UIUserNotificationType.Sound], categories: nil)
+            UIApplication.sharedApplication().registerUserNotificationSettings(settings)
+            UIApplication.sharedApplication().registerForRemoteNotifications()
+        } else {
+            // Register for push in iOS 7
+            UIApplication.sharedApplication().registerForRemoteNotificationTypes([UIRemoteNotificationType.Badge, UIRemoteNotificationType.Sound, UIRemoteNotificationType.Alert])
+        }
+    }
+    
+    // MARK: UITableViewDataSource
+
+    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCellWithIdentifier("SA_STR_CELL_USER".localized, forIndexPath: indexPath) as! UserTableViewCell
+        
+        let user = self.users[indexPath.row]
+        
+        cell.setColorMarkerText(String(indexPath.row + 1), color: ServicesManager.instance().color(forUser: user))
+        cell.userDescription = "SA_STR_LOGIN_AS".localized + " " + user.fullName!
+        cell.tag = indexPath.row
+        
+        return cell
+    }
+    
+    // MARK: UITableViewDelegate
+    
+    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        tableView.deselectRowAtIndexPath(indexPath, animated:true)
+        
+        /*let user = self.users[indexPath.row]
+        user.password = kTestUsersDefaultPassword*/
+        let user = QBUUser()
+        user.login="tonio@localhost"
+        user.ID = 12467044
+        user.password = "password"
+        
+        self.logInChatWithUser(user)
+    }
+    
+}
