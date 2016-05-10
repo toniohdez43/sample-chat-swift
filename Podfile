@@ -2,7 +2,7 @@ platform :ios, "7.0"
 
 pod 'SVProgressHUD', '~> 1.1.3'
 pod 'TWMessageBarManager', '~> 1.7.2'
-
+pod 'XMPPFramework', '~> 3.6'
 #Production pod
 pod 'QMCVDevelopment', :git => 'git@github.com:QuickBlox/QMChatViewController-ios.git', :commit => '6d70c0f04ef2c199b928ff1a2f8edf9d48b510c5'
 

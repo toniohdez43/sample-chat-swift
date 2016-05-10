@@ -18,7 +18,7 @@
 
 #import <QMServices.h>
 #import <SVProgressHUD.h>
-
+#import "XMPP.h"
 #import "QMChatViewController.h"
 #import "QMChatContactRequestCell.h"
 #import "QMChatNotificationCell.h"

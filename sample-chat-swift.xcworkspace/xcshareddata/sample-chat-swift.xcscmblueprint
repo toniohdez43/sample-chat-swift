@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "73C57581A14935D0CF67E1250DFB7B1DA967B275",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "43E48969AB834C98133F4F66DEBB455ACE272805" : 0,
+    "73C57581A14935D0CF67E1250DFB7B1DA967B275" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "782FA962-48F6-4C92-97A6-2AEEDC5DB308",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "43E48969AB834C98133F4F66DEBB455ACE272805" : "",
+    "73C57581A14935D0CF67E1250DFB7B1DA967B275" : "sample-chat-swift\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "sample-chat-swift",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "sample-chat-swift.xcworkspace",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/QuickBlox\/quickblox-ios-sdk.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "43E48969AB834C98133F4F66DEBB455ACE272805"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/toniohdez43\/sample-chat-swift.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "73C57581A14935D0CF67E1250DFB7B1DA967B275"
+    }
+  ]
+}
