@@ -15,11 +15,23 @@
 @import MobileCoreServices;
 @import Quickblox;
 
-
+#import "XMPPMessageArchivingCoreDataStorage.h"
+#import "XMPPMessageArchiving.h"
+#import "XMPPMessageDeliveryReceipts.h"
 #import <QMServices.h>
 #import <SVProgressHUD.h>
 #import "XMPP.h"
+#import "XMPPvCardAvatarModule.h"
+#import "XMPPCapabilitiesCoreDataStorage.h"
+#import "XMPPvCardCoreDataStorage.h"
+#import "XMPPRosterCoreDataStorage.h"
+#import "XMPPRoom.h"
+#import "XMPPRoomMemoryStorage.h"
+#import "XMPPLastActivity.h"
 #import "QMChatViewController.h"
+#import "XMPPUserCoreDataStorageObject.h"
+#import "XMPPRoster.h"
+#import "XMPPReconnect.h"
 #import "QMChatContactRequestCell.h"
 #import "QMChatNotificationCell.h"
 #import "QMChatIncomingCell.h"

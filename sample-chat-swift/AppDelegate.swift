@@ -20,7 +20,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, NotificationServiceDelega
 	var window: UIWindow?
 	
 	func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
-
+        
         // Set QuickBlox credentials (You must create application in admin.quickblox.com).
         QBSettings.setAccountKey("yjYy18hXswrqFSpHKbSj")
         //QBSettings.setApiEndpoint("https://api.quickblox.com", chatEndpoint: "chat.quickblox.com", forServiceZone: qbprod)
@@ -44,6 +44,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, NotificationServiceDelega
         if (remoteNotification != nil) {
             ServicesManager.instance().notificationService.pushDialogID = remoteNotification["SA_STR_PUSH_NOTIFICATION_DIALOG_ID".localized] as? String
         }
+        OneChat.start(true, delegate: nil) { (stream, error) -> Void in
+            if let _ = error {
+                //handle start errors here
+            } else {
+                print("hola")
+            }
+            
+        }
+     
+
 		
 		return true
 	}
@@ -113,6 +123,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, NotificationServiceDelega
     func applicationWillTerminate(application: UIApplication) {
         // Logging out from chat.
         ServicesManager.instance().chatService.disconnectWithCompletionBlock(nil)
+        OneChat.stop()
     }
 	
     // MARK: NotificationServiceDelegate protocol
