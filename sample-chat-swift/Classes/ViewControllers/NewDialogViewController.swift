@@ -32,6 +32,9 @@
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         self.checkCreateChatButtonState()
+        
+        print("hola")
+        
     }
     
     func updateUsers() {
@@ -58,6 +61,7 @@
     func checkCreateChatButtonState() {
         self.navigationItem.rightBarButtonItem?.enabled = tableView.indexPathsForSelectedRows?.count != nil
     }
+       
     
     @IBAction func createChatButtonPressed(sender: AnyObject) {
         

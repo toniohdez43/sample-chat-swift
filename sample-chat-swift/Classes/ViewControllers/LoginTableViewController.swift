@@ -13,7 +13,7 @@ import UIKit
  */
 let kTestUsersDefaultPassword = "x6Bt0VDy5"
 
-class LoginTableViewController: UsersListTableViewController, NotificationServiceDelegate {
+class LoginTableViewController: UITableViewController, NotificationServiceDelegate {
 
     // MARK: ViewController overrides
     //public var xmppStream: XMPPStream?
@@ -87,10 +87,16 @@ class LoginTableViewController: UsersListTableViewController, NotificationServic
         }
     }
 
+    func dismissKeyboard() {
+        //Causes the view (or one of its embedded text fields) to resign the first responder status.
+        view.endEditing(true)
+    }
+    
     override func viewDidLoad() {
 		super.viewDidLoad()
 		//xmppStream?.ho
-		
+        //let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(LoginTableViewController.dismissKeyboard))
+       // view.addGestureRecognizer(tap)
 		guard let currentUser = ServicesManager.instance().currentUser() else {
 			return
 		}
@@ -190,17 +196,7 @@ class LoginTableViewController: UsersListTableViewController, NotificationServic
     
     // MARK: UITableViewDataSource
 
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("SA_STR_CELL_USER".localized, forIndexPath: indexPath) as! UserTableViewCell
-        
-        let user = self.users[indexPath.row]
-        
-        cell.setColorMarkerText(String(indexPath.row + 1), color: ServicesManager.instance().color(forUser: user))
-        cell.userDescription = "SA_STR_LOGIN_AS".localized + " " + user.fullName!
-        cell.tag = indexPath.row
-        
-        return cell
-    }
+
     
     // MARK: UITableViewDelegate
     

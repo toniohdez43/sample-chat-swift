@@ -14,10 +14,10 @@ class UsersListTableViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-		
-
+		self.retrieveAllUsersFromPage(1)
+        
         // Fetching users from cache.
-        ServicesManager.instance().usersService.loadFromCache().continueWithBlock { [weak self] (task : BFTask!) -> AnyObject! in
+        /*ServicesManager.instance().usersService.loadFromCache().continueWithBlock { [weak self] (task : BFTask!) -> AnyObject! in
             if task.result!.count > 0 {
 				guard let users = ServicesManager.instance().sortedUsers() else {
 					print("No cached users")
@@ -49,11 +49,30 @@ class UsersListTableViewController: UITableViewController {
             }
             
             return nil;
-        }
+        }*/
     }
     
     // MARK: UITableViewDataSource
-    
+    func retrieveAllUsersFromPage(page:UInt){
+        let pag = QBGeneralResponsePage(currentPage: page,perPage: 100)
+        QBRequest.usersForPage(pag, successBlock: { (response: QBResponse, pageInformation:QBGeneralResponsePage? , users: [QBUUser]?) in
+            var userNumber:Int=0
+            userNumber += (users?.count)!
+            print(self.users)
+            self.users=users!
+            print(self.users)
+            self.tableView.reloadData()
+            //if pageInformation?.totalEntries > userNumber{
+            //self.retrieveAllUsersFromPage((pageInformation?.totalEntries)!+1)
+            //}
+        }) { (response: QBResponse) in
+            print(response)
+            
+        }
+        
+        
+    }
+
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         return 1
     }
@@ -68,7 +87,7 @@ class UsersListTableViewController: UITableViewController {
         let user = self.users[indexPath.row]
         
         cell.setColorMarkerText(String(indexPath.row + 1), color: ServicesManager.instance().color(forUser: user))
-        cell.userDescription = user.fullName
+        cell.userDescription = user.login
         cell.tag = indexPath.row
         
         return cell
