@@ -85,9 +85,21 @@ class UsersListTableViewController: UITableViewController {
         let cell = tableView.dequeueReusableCellWithIdentifier("SA_STR_CELL_USER".localized, forIndexPath: indexPath) as! UserTableViewCell
         
         let user = self.users[indexPath.row]
+        var currentTimeInterval: Double = NSDate( ).timeIntervalSince1970
+        var userLastRequestAtTimeInterval: Double = user.lastRequestAt!.timeIntervalSince1970
+        if((currentTimeInterval - userLastRequestAtTimeInterval) > 60){
+            // user is offline now
+            cell.setColorMarkerText(String(indexPath.row + 1), color: ServicesManager.instance().color(forUser: user))
+            cell.userDescription = user.login!+" offline"
+        }
+        else{
+        //online
+            cell.setColorMarkerText(String(indexPath.row + 1), color: UIColor.greenColor())
+            cell.userDescription = user.login!+" online"
+        }
         
-        cell.setColorMarkerText(String(indexPath.row + 1), color: ServicesManager.instance().color(forUser: user))
-        cell.userDescription = user.login
+        
+        
         cell.tag = indexPath.row
         
         return cell

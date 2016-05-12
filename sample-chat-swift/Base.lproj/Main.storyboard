@@ -525,6 +525,12 @@
                                                 </userDefinedRuntimeAttribute>
                                             </userDefinedRuntimeAttributes>
                                         </view>
+                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Status" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="drC-rR-9d5">
+                                            <rect key="frame" x="487" y="12" width="73" height="21"/>
+                                            <fontDescription key="fontDescription" type="system" weight="thin" pointSize="15"/>
+                                            <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                            <nil key="highlightedColor"/>
+                                        </label>
                                     </subviews>
                                     <constraints>
                                         <constraint firstItem="K99-mb-fb1" firstAttribute="leading" secondItem="wfN-pM-lov" secondAttribute="leading" constant="12" id="7gP-ka-RQ0"/>
@@ -534,10 +540,15 @@
                                         <constraint firstItem="I95-6P-mOh" firstAttribute="top" secondItem="wfN-pM-lov" secondAttribute="topMargin" constant="4" id="p9N-mv-r8e"/>
                                     </constraints>
                                 </tableViewCellContentView>
+                                <constraints>
+                                    <constraint firstItem="drC-rR-9d5" firstAttribute="centerY" secondItem="7q2-An-7NX" secondAttribute="centerY" id="2IQ-9A-11S"/>
+                                    <constraint firstAttribute="trailing" secondItem="drC-rR-9d5" secondAttribute="trailing" constant="40" id="Icy-yD-nbf"/>
+                                </constraints>
                                 <inset key="separatorInset" minX="51" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 <connections>
                                     <outlet property="colorMarker" destination="K99-mb-fb1" id="Kz2-UA-xh0"/>
                                     <outlet property="userDescriptionLabel" destination="I95-6P-mOh" id="lWw-oq-bTL"/>
+                                    <outlet property="userStatusLabel" destination="drC-rR-9d5" id="knb-on-kdN"/>
                                 </connections>
                             </tableViewCell>
                         </prototypes>

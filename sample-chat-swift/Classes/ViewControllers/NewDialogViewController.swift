@@ -303,8 +303,20 @@
         
         let user = self.users[indexPath.row]
         
-        cell.setColorMarkerText(String(indexPath.row + 1), color: ServicesManager.instance().color(forUser: user))
-        cell.userDescription = user.login
+        var currentTimeInterval: Double = NSDate( ).timeIntervalSince1970
+        var userLastRequestAtTimeInterval: Double = (user.lastRequestAt?.timeIntervalSince1970)!
+        if((currentTimeInterval - userLastRequestAtTimeInterval) > 60){
+            // user is offline now
+            cell.setColorMarkerText(String(indexPath.row + 1), color: ServicesManager.instance().color(forUser: user))
+            cell.userDescription = user.login!
+            cell.userStatus="Offline"
+        }
+        else{
+            //online
+            cell.setColorMarkerText(String(indexPath.row + 1), color: UIColor.greenColor())
+            cell.userDescription = user.login!
+            cell.userStatus="Online"
+        }
         cell.tag = indexPath.row
         
         return cell

@@ -12,12 +12,19 @@ class UserTableViewCell: UITableViewCell {
     @IBOutlet private weak var colorMarker: CornerView!
     @IBOutlet private weak var userDescriptionLabel: UILabel!
     
+    @IBOutlet weak var userStatusLabel: UILabel!
+
     var user: QBUUser?
     var dialogID = ""
     
     var userDescription:String! {
         didSet {
             self.userDescriptionLabel.text = userDescription
+        }
+    }
+    var userStatus:String! {
+        didSet {
+            self.userStatusLabel.text = userStatus
         }
     }
     
