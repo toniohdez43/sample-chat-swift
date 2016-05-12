@@ -142,7 +142,7 @@ class DialogsViewController: UITableViewController, QMChatServiceDelegate, QMCha
         
         let logoutGroup = dispatch_group_create()
         dispatch_group_enter(logoutGroup)
-        
+        OneChat.sharedInstance.disconnect()
         let deviceIdentifier = UIDevice.currentDevice().identifierForVendor!.UUIDString
 		
         QBRequest.unregisterSubscriptionForUniqueDeviceIdentifier(deviceIdentifier, successBlock: { (response: QBResponse!) -> Void in

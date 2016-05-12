@@ -28,6 +28,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, NotificationServiceDelega
         
         QBSettings.setAuthSecret("fNEan7pyzXwXN5V")
         QBSettings.setApplicationID(40425)
+        //QBSettings.setApiEndpoint("https://api.quickblox.com", chatEndpoint: "192.241.244.151", forServiceZone: QBConnectionZoneTypeProduction)
         
         // enabling carbons for chat
         QBSettings.setCarbonsEnabled(true)

@@ -20,7 +20,7 @@ class LoginTableViewController: UITableViewController, NotificationServiceDelega
     @IBOutlet weak var domainTextF: UITextField!
     @IBOutlet var usernameTextF: UITextField!
     @IBOutlet var passwordTextF: UITextField!
-    @IBOutlet var validateBttn:  UIButton!
+ 
     
     @IBAction func validate(sender: AnyObject) {
         if OneChat.sharedInstance.isConnected() {
@@ -30,8 +30,7 @@ class LoginTableViewController: UITableViewController, NotificationServiceDelega
                 }, errorBlock:   { (response:QBResponse) in                  print("unable to logout")})
             usernameTextF.hidden = false
             passwordTextF.hidden = false
-            validateBttn.setTitle("Validate", forState: UIControlState.Normal)
-        } else {
+                   } else {
             if self.domainTextF.text! != ""
             {
                 OneChat.sharedInstance.xmppStream?.hostName=self.domainTextF.text!
@@ -64,26 +63,30 @@ class LoginTableViewController: UITableViewController, NotificationServiceDelega
                             //do something
                         }))
                         self.presentViewController(alertController, animated: true, completion: nil)
-                    } else {
-                        let user:QBUUser! = QBUUser()
-                        user.password=self.passwordTextF.text!
-                        user.login = self.usernameTextF.text!
-                        QBRequest.signUp(user, successBlock: { (response:QBResponse,user: QBUUser?) in
-                            print("logro el sign")
-                            self.logInChatWithUser(user!)
-                            QBChat.instance().connectWithUser(user!) { (error: NSError?) -> Void in
-                                print("unable to connect")
-                            }
-                            }, errorBlock: { (response:QBResponse) in
-                                 self.logInChatWithUser(user)
-                        })
+                    } else {}
                         
-                        
-                        
-                    }
-                       self.dismissViewControllerAnimated(true, completion: nil)
+                    
                 }
+                else{
+                    let user:QBUUser! = QBUUser()
+                    user.password=self.passwordTextF.text!
+                    user.login = self.usernameTextF.text!
+                    QBRequest.signUp(user, successBlock: { (response:QBResponse,user: QBUUser?) in
+                        print("logro el sign")
+                        self.logInChatWithUser(user!)
+                        QBChat.instance().connectWithUser(user!) { (error: NSError?) -> Void in
+                            print("unable to connect")
+                        }
+                        }, errorBlock: { (response:QBResponse) in
+                            self.logInChatWithUser(user)
+                    })
+                    
+                    
+                    
+                }
+                self.dismissViewControllerAnimated(true, completion: nil)
             }
+            
         }
     }
 
@@ -209,21 +212,72 @@ class LoginTableViewController: UITableViewController, NotificationServiceDelega
         user.login="tonio@localhost"
         user.ID = 12467044
         user.password = "password"
-        OneChat.sharedInstance.connect(username: "tonio@localhost", password: "password") { (stream, error) -> Void in
-            if let _ = error {
-                if #available(iOS 8.0, *) {
-                    let alertController = UIAlertController(title: "Sorry", message: "An error occured: \(error)", preferredStyle: UIAlertControllerStyle.Alert)
-                    alertController.addAction(UIAlertAction(title: "Ok", style: UIAlertActionStyle.Default, handler: { (UIAlertAction) -> Void in
-                        //do something
-                    }))
-                    self.presentViewController(alertController, animated: true, completion: nil)
-                } else {
+        if OneChat.sharedInstance.isConnected() {
+            OneChat.sharedInstance.disconnect()
+            QBRequest.logOutWithSuccessBlock({ (response:QBResponse) in
+                print("logged out")
+                }, errorBlock:   { (response:QBResponse) in                  print("unable to logout")})
+            usernameTextF.hidden = false
+            passwordTextF.hidden = false
+        } else {
+            if self.domainTextF.text! != ""
+            {
+                OneChat.sharedInstance.xmppStream?.hostName=self.domainTextF.text!
+            }
+            else{
+                let user:QBUUser! = QBUUser()
+                user.password=self.passwordTextF.text!
+                user.login = self.usernameTextF.text!
+                QBRequest.signUp(user, successBlock: { (response:QBResponse,user: QBUUser?) in
+                    print("logro el sign")
+                    self.logInChatWithUser(user!)
+                    QBChat.instance().connectWithUser(user!) { (error: NSError?) -> Void in
+                        print("unable to connect")
+                    }
+                    }, errorBlock: { (response:QBResponse) in
+                        self.logInChatWithUser(user!)
+                })
+                
+                
+                self.dismissViewControllerAnimated(true, completion: nil)
+                
+                
+            }
+            
+            OneChat.sharedInstance.connect(username: self.usernameTextF.text!, password:    self.passwordTextF.text!) { (stream, error) -> Void in
+                if let _ = error {
+                    if #available(iOS 8.0, *) {
+                        var alertController = UIAlertController(title: "Sorry", message: "An error occured: \(error)", preferredStyle: UIAlertControllerStyle.Alert)
+                        alertController.addAction(UIAlertAction(title: "Ok", style: UIAlertActionStyle.Default, handler: { (UIAlertAction) -> Void in
+                            //do something
+                        }))
+                        self.presentViewController(alertController, animated: true, completion: nil)
+                    } else {}
+                    
+                    
+                }
+                else{
+                    let user:QBUUser! = QBUUser()
+                    user.password=self.passwordTextF.text!
+                    user.login = self.usernameTextF.text!
+                    QBRequest.signUp(user, successBlock: { (response:QBResponse,user: QBUUser?) in
+                        print("logro el sign")
+                        self.logInChatWithUser(user!)
+                        QBChat.instance().connectWithUser(user!) { (error: NSError?) -> Void in
+                            print("unable to connect")
+                        }
+                        }, errorBlock: { (response:QBResponse) in
+                            self.logInChatWithUser(user)
+                    })
+                    
+                    
                     
                 }
                 self.dismissViewControllerAnimated(true, completion: nil)
+
             }
         }
-        self.logInChatWithUser(user)
+
     }
     
 }

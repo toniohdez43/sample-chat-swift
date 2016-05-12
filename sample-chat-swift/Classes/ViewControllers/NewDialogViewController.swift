@@ -304,7 +304,7 @@
         let user = self.users[indexPath.row]
         
         cell.setColorMarkerText(String(indexPath.row + 1), color: ServicesManager.instance().color(forUser: user))
-        cell.userDescription = user.fullName
+        cell.userDescription = user.login
         cell.tag = indexPath.row
         
         return cell
