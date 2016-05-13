@@ -4,6 +4,7 @@
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <capability name="Navigation items with more than one left or right bar item" minToolsVersion="7.0"/>
     </dependencies>
     <scenes>
         <!--HBlink-->
@@ -154,7 +155,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" red="0.92549019607843142" green="0.92156862745098034" blue="0.94901960784313721" alpha="1" colorSpace="calibratedRGB"/>
                         <view key="tableHeaderView" contentMode="scaleToFill" id="xDY-Jn-VPt">
-                            <rect key="frame" x="0.0" y="0.0" width="600" height="44"/>
+                            <rect key="frame" x="0.0" y="64" width="600" height="44"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <subviews>
                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Select Users You Want to Chat" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="V3q-JU-fNp">
@@ -181,13 +182,13 @@
                             </constraints>
                         </view>
                         <view key="tableFooterView" contentMode="scaleToFill" id="cVE-Kh-tSy">
-                            <rect key="frame" x="0.0" y="110" width="600" height="1"/>
+                            <rect key="frame" x="0.0" y="174" width="600" height="1"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             <color key="backgroundColor" red="0.74117647058823533" green="0.73725490196078436" blue="0.76078431372549016" alpha="1" colorSpace="calibratedRGB"/>
                         </view>
                         <prototypes>
                             <tableViewCell contentMode="scaleToFill" selectionStyle="gray" indentationWidth="10" reuseIdentifier="UserTableViewCellIdentifier" id="BYb-5H-JmT" customClass="UserTableViewCell" customModule="sample_chat_swift" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="66" width="600" height="44"/>
+                                <rect key="frame" x="0.0" y="130" width="600" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="BYb-5H-JmT" id="VtI-2y-0es">
                                     <rect key="frame" x="0.0" y="0.0" width="600" height="43.5"/>
@@ -247,11 +248,18 @@
                     </tableView>
                     <toolbarItems/>
                     <navigationItem key="navigationItem" title="Select opponents" id="Iav-xC-5Zn">
-                        <barButtonItem key="rightBarButtonItem" title="join chat" style="done" id="8DF-TW-lQY">
-                            <connections>
-                                <action selector="createChatButtonPressed:" destination="3ff-8d-9pb" id="oBg-iN-bf8"/>
-                            </connections>
-                        </barButtonItem>
+                        <rightBarButtonItems>
+                            <barButtonItem title="join chat" style="done" id="8DF-TW-lQY">
+                                <connections>
+                                    <action selector="createChatButtonPressed:" destination="3ff-8d-9pb" id="oBg-iN-bf8"/>
+                                </connections>
+                            </barButtonItem>
+                            <barButtonItem systemItem="add" id="sqs-CC-x4q">
+                                <connections>
+                                    <action selector="addContact:" destination="3ff-8d-9pb" id="gGo-dE-N6u"/>
+                                </connections>
+                            </barButtonItem>
+                        </rightBarButtonItems>
                     </navigationItem>
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
@@ -583,7 +591,7 @@
         <image name="user" width="49" height="48"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="P2j-TU-AWx"/>
         <segue reference="k6E-hp-7pJ"/>
+        <segue reference="Mia-Tg-jSJ"/>
     </inferredMetricsTieBreakers>
 </document>

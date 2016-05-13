@@ -76,7 +76,7 @@ class DialogTableViewCellModel: NSObject {
     }
 }
 
-class DialogsViewController: UITableViewController, QMChatServiceDelegate, QMChatConnectionDelegate {
+class DialogsViewController: UITableViewController, QMChatServiceDelegate, QMChatConnectionDelegate, QBChatDelegate {
     
     private var didEnterBackgroundDate: NSDate?
     
@@ -110,10 +110,41 @@ class DialogsViewController: UITableViewController, QMChatServiceDelegate, QMCha
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
-        
+        print(QBChat.instance().contactList!.contacts)
+        print(QBChat.instance().contactList!.pendingApproval)
         self.tableView.reloadData()
     }
-    
+    func chatDidReceiveContactAddRequestFromUser(userID: UInt) {
+        AlertViewWithTextField(title: "Solicitud de amistad", message: "De \(userID)", showOver: self, didClickOk: { (text) -> Void in
+            
+            QBChat.instance().confirmAddContactRequest(userID, completion: { (error: NSError?) -> Void in
+                print(error)
+            })
+            
+            
+            
+            
+        }  ) { () -> Void in
+            
+            // cancel
+            QBChat.instance().rejectAddContactRequest(userID, completion: { (error: NSError?) -> Void in
+                
+            });
+        }
+
+    }
+    func chatDidReceiveAcceptContactRequestFromUser(userID: UInt) {
+        AlertView(title: "Solicitud Aceptada", message: "De \(userID)", cancelButtonTitle: "Cancel", otherButtonTitle: ["OK"], didClick: {(buttonIndex: Int)->
+            Void in
+        })
+    }
+    func chatDidReceiveRejectContactRequestFromUser(userID: UInt) {
+        AlertView(title: "Solicitud Aceptada", message: "De \(userID)", cancelButtonTitle: "Cancel", otherButtonTitle: ["OK"], didClick: {(buttonIndex: Int)->
+            Void in
+        })
+
+        
+    }
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if segue.identifier == "SA_STR_SEGUE_GO_TO_CHAT".localized {
             if let chatVC = segue.destinationViewController as? ChatViewController {

@@ -10,6 +10,41 @@
  class NewDialogViewController: UsersListTableViewController, QMChatServiceDelegate, QMChatConnectionDelegate {
     var dialog: QBChatDialog?
     
+    @IBAction func addContact(sender: AnyObject) {
+        var userContact = QBUUser()
+        AlertViewWithTextField(title: "Nombre de Contacto", message: nil, showOver:self, didClickOk: { (text) -> Void in
+            
+            let userName = text
+            
+            for usuario in self.users
+            {
+                if usuario.login == userName
+                {
+                    userContact=usuario
+                }
+            }
+            QBChat.instance().addUserToContactListRequest(userContact.ID, completion: {(error: NSError?) -> Void in
+                print(error)
+            })
+            print(QBChat.instance().contactList!.contacts)
+                print(QBChat.instance().contactList!.pendingApproval)
+            
+            
+            
+        }) { () -> Void in
+            
+            // cancel
+            (sender as! UIBarButtonItem).enabled = true
+        }
+        
+    }
+    func chatContactListDidChange(contactList: QBContactList!) {
+        
+    }
+    
+    func chatDidReceiveContactItemActivity(userID: UInt, isOnline: Bool, status: String!) {
+        
+    }
     override func viewDidLoad() {
         super.viewDidLoad()
         self.checkCreateChatButtonState()
@@ -309,13 +344,13 @@
             // user is offline now
             cell.setColorMarkerText(String(indexPath.row + 1), color: ServicesManager.instance().color(forUser: user))
             cell.userDescription = user.login!
-            cell.userStatus="Offline"
+            //cell.userStatusLabel.text="Offline"
         }
         else{
             //online
             cell.setColorMarkerText(String(indexPath.row + 1), color: UIColor.greenColor())
             cell.userDescription = user.login!
-            cell.userStatus="Online"
+            //cell.userStatusLabel.text="Online"
         }
         cell.tag = indexPath.row
         

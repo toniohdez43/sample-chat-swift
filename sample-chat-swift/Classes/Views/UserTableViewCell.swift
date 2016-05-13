@@ -22,11 +22,7 @@ class UserTableViewCell: UITableViewCell {
             self.userDescriptionLabel.text = userDescription
         }
     }
-    var userStatus:String! {
-        didSet {
-            self.userStatusLabel.text = userStatus
-        }
-    }
+    
     
     func setColorMarkerText(text: String, color: UIColor){
         self.colorMarker.backgroundColor = color

@@ -100,7 +100,7 @@ class LoginTableViewController: UITableViewController, NotificationServiceDelega
 		//xmppStream?.ho
         //let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(LoginTableViewController.dismissKeyboard))
        // view.addGestureRecognizer(tap)
-		guard let currentUser = ServicesManager.instance().currentUser() else {
+		/*guard let currentUser = ServicesManager.instance().currentUser() else {
 			return
 		}
 		
@@ -129,7 +129,7 @@ class LoginTableViewController: UITableViewController, NotificationServiceDelega
 			else {
 				strongSelf.performSegueWithIdentifier("SA_STR_SEGUE_GO_TO_DIALOGS".localized, sender: nil)
 			}
-			})
+			})*/
 		
 		self.tableView.reloadData()
     }
