@@ -236,6 +236,7 @@ class LoginTableViewController: UITableViewController, NotificationServiceDelega
                     }
                     }, errorBlock: { (response:QBResponse) in
                         self.logInChatWithUser(user!)
+                        QBChat.instance().sendPresenceWithStatus("I am online")
                 })
                 
                 
@@ -268,6 +269,7 @@ class LoginTableViewController: UITableViewController, NotificationServiceDelega
                         }
                         }, errorBlock: { (response:QBResponse) in
                             self.logInChatWithUser(user)
+                            QBChat.instance().sendPresenceWithStatus("I am online")
                     })
                     
                     

@@ -5,7 +5,7 @@
 //  Created by Anton Sokolchenko on 4/1/15.
 //  Copyright (c) 2015 quickblox. All rights reserved.
 //
-
+import Foundation
 var messageTimeDateFormatter: NSDateFormatter {
     struct Static {
         static let instance : NSDateFormatter = {
@@ -18,7 +18,7 @@ var messageTimeDateFormatter: NSDateFormatter {
     return Static.instance
 }
 
-class ChatViewController: QMChatViewController, QMChatServiceDelegate, UIActionSheetDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, QMChatAttachmentServiceDelegate, QMChatConnectionDelegate, QMChatCellDelegate {
+class ChatViewController: QMChatViewController, QMChatServiceDelegate, UIActionSheetDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, QMChatAttachmentServiceDelegate, QMChatConnectionDelegate, QMChatCellDelegate, TTTAttributedLabelDelegate {
     
     var dialog: QBChatDialog!
     var willResignActiveBlock: AnyObject?
@@ -430,7 +430,8 @@ class ChatViewController: QMChatViewController, QMChatServiceDelegate, UIActionS
 			}
 		}
     }
-	
+ 
+ 
     // MARK: Strings builder
 	
     override func attributedStringForItem(messageItem: QBChatMessage!) -> NSAttributedString? {
@@ -445,6 +446,13 @@ class ChatViewController: QMChatViewController, QMChatServiceDelegate, UIActionS
         }
         
         var attributes = Dictionary<String, AnyObject>()
+        var str = messageItem.text!
+        //str=str.substringWithRange(Range<String.Index>(start: str.startIndex, end: str.endIndex.advancedBy(-1)))
+        if(str.rangeOfString("https://www.") != nil||str.rangeOfString("http://www.") != nil){
+            attributes[NSLinkAttributeName]=NSURL(string: messageItem.text!)
+        //UIApplication.sharedApplication().openURL(NSURL(string: messageItem.text!)!)
+            
+        }
         attributes[NSForegroundColorAttributeName] = textColor
         attributes[NSFontAttributeName] = UIFont(name: "Helvetica", size: 17)
         
@@ -509,8 +517,14 @@ class ChatViewController: QMChatViewController, QMChatServiceDelegate, UIActionS
         if messageItem.senderID == self.senderID {
             text = text + "\n" + self.statusStringFromMessage(messageItem)
         }
+        var str = messageItem.text!
+        if(str.rangeOfString("https://www.") != nil||str.rangeOfString("http://www.") != nil){
+            attributes[NSLinkAttributeName]=NSURL(string: messageItem.text!)
+            //UIApplication.sharedApplication().openURL(NSURL(string: messageItem.text!)!)
+            
+        }
         
-        let bottomLabelAttributedString = NSAttributedString(string: text, attributes: attributes)
+        let bottomLabelAttributedString = NSAttributedString(string: messageItem.text!, attributes: attributes)
         
         return bottomLabelAttributedString
     }
@@ -547,6 +561,7 @@ class ChatViewController: QMChatViewController, QMChatServiceDelegate, UIActionS
 			let attributedString = self.attributedStringForItem(message)
 			
 			size = TTTAttributedLabel.sizeThatFitsAttributedString(attributedString, withConstraints: CGSize(width: maxWidth, height: CGFloat.max), limitedToNumberOfLines: 0)
+            
 		}
 		
         return size
@@ -720,7 +735,7 @@ class ChatViewController: QMChatViewController, QMChatServiceDelegate, UIActionS
     
     override func collectionView(collectionView: UICollectionView, performAction action: Selector, forItemAtIndexPath indexPath: NSIndexPath, withSender sender: AnyObject!) {
 		
-		guard action == #selector(NSObject.copy(_:)) else {
+        guard action == #selector(NSObject.copy(_:)) else {
 			return
 		}
 		
@@ -793,8 +808,17 @@ class ChatViewController: QMChatViewController, QMChatServiceDelegate, UIActionS
 		}
 		
 		self.collectionView?.collectionViewLayout.removeSizeFromCacheForItemID(currentMessageID)
+        
 		self.collectionView?.performBatchUpdates(nil, completion: nil)
-		
+        
+        
+        
+        UIApplication.sharedApplication().openURL(NSURL(string: cell.textView.text!)!)
+        
+    }
+    
+    func attributedLabel(label: TTTAttributedLabel!, didSelectLinkWithURL url: NSURL!) {
+        UIApplication.sharedApplication().openURL(url)
     }
 
     func chatCell(cell: QMChatCell!, didPerformAction action: Selector, withSender sender: AnyObject!) {

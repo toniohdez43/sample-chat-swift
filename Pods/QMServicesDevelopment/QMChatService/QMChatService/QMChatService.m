@@ -345,15 +345,238 @@ static NSString* const kQMChatServiceDomain = @"com.q-municate.chatservice";
     }
 }
 
+
+-(NSString *) randomStringWithLength: (int) len {
+    NSString *letters = @"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    
+    NSMutableString *randomString = [NSMutableString stringWithCapacity: len];
+    
+    for (int i=0; i<len; i++) {
+        [randomString appendFormat: @"%C", [letters characterAtIndex: arc4random_uniform([letters length])]];
+    }
+    
+    return randomString;
+}
 - (void)handleChatMessage:(QBChatMessage *)message {
     
     if (!message.dialogID) {
         
-        NSLog(@"Need update this case");
+       NSMutableDictionary *extendedRequest = @{@"sort_desc" : @"message.senderID"}.mutableCopy;
+        QBResponsePage *page = [QBResponsePage responsePageWithLimit:100 skip:0];
         
-        return;
-    }
-    
+        [QBRequest dialogsForPage:page extendedRequest:nil successBlock:^(QBResponse *response, NSArray *dialogObjects, NSSet *dialogsUsersIDs, QBResponsePage *page) {
+            int arrayLength = (sizeof dialogObjects);
+            //NSLog(dialogObjects);
+            for(QBChatDialog *dialog in dialogObjects)
+            {
+                long ocu0 = dialog.occupantIDs[0].longValue;
+                long ocu1 = dialog.occupantIDs[1].longValue;
+                long sender = message.senderID;
+                long recipient = message.recipientID;
+                if(((ocu0==recipient)||(ocu1==recipient))&&((ocu0==sender)||(ocu1==sender)))
+                {
+                    
+                    message.dialogID=dialog.ID;
+                    message.dateSent = [NSDate date];
+                    message.saveToHistory = kChatServiceSaveToHistoryTrue;
+                    message.ID = [self randomStringWithLength:10];
+                    
+                    /*[self sendMessage2:message toDialogID:dialog.ID saveToHistory:true saveToStorage:true completion:^(NSError * _Nullable error) {
+                        
+                    }];*/
+                    
+                    QBChatDialog *chatDialogToUpdate = [self.dialogsMemoryStorage chatDialogWithID:message.dialogID];
+                    
+                    [self updateParamsForQBChatDialog:chatDialogToUpdate withQBChatMessage:message];
+                    
+                    if (message.messageType == QMMessageTypeText) {
+                        BOOL shouldSaveDialog = NO;
+                        
+                        //Update chat dialog in memory storage
+                        if (chatDialogToUpdate == nil) {
+                            
+                            chatDialogToUpdate = [[QBChatDialog alloc] initWithDialogID:message.dialogID type:QBChatDialogTypePrivate];
+                            
+                            BOOL isCarbon = [self.serviceManager currentUser].ID == message.recipientID;
+                            
+                            
+                            chatDialogToUpdate.occupantIDs = @[@([self.serviceManager currentUser].ID), @(isCarbon ? message.senderID: message.recipientID)];
+                            
+                            shouldSaveDialog = YES;
+                        }
+                        
+                        if (message.senderID != [QBSession currentSession].currentUser.ID
+                            && !(chatDialogToUpdate.type == QBChatDialogTypePrivate && message.delayed)) {
+                            
+                            chatDialogToUpdate.unreadMessagesCount++;
+                        }
+                        
+                        [self updateParamsForQBChatDialog:chatDialogToUpdate withQBChatMessage:message];
+                        
+                        if (shouldSaveDialog) {
+                            
+                            [self.dialogsMemoryStorage addChatDialog:chatDialogToUpdate andJoin:NO completion:nil];
+                            
+                            if ([self.multicastDelegate respondsToSelector:@selector(chatService:didAddChatDialogToMemoryStorage:)]) {
+                                
+                                [self.multicastDelegate chatService:self didAddChatDialogToMemoryStorage:chatDialogToUpdate];
+                            }
+                        }
+                        else {
+                            
+                            if ([self.multicastDelegate respondsToSelector:@selector(chatService:didUpdateChatDialogInMemoryStorage:)]) {
+                                
+                                [self.multicastDelegate chatService:self didUpdateChatDialogInMemoryStorage:chatDialogToUpdate];
+                            }
+                        }
+                    }
+                    else if (message.messageType == QMMessageTypeUpdateGroupDialog) {
+                        
+                        if (chatDialogToUpdate) {
+                            
+                            NSNumber *currentUserID = @([self.serviceManager currentUser].ID);
+                            //if current user leaves the chat there are no needs for updating the dialog
+                            if ([message.deletedOccupantsIDs containsObject:currentUserID]) {
+                                
+                                [self.dialogsMemoryStorage deleteChatDialogWithID:chatDialogToUpdate.ID];
+                                if ([self.multicastDelegate respondsToSelector:@selector(chatService:didDeleteChatDialogWithIDFromMemoryStorage:)]) {
+                                    [self.multicastDelegate chatService:self didDeleteChatDialogWithIDFromMemoryStorage:chatDialogToUpdate.ID];
+                                }
+                                
+                                return;
+                            }
+                            
+                            // old custom parameters handling
+                            if (message.dialog != nil) {
+                                
+                                if (message.dialog.name != nil) {
+                                    chatDialogToUpdate.name = message.dialog.name;
+                                }
+                                if (message.dialog.photo != nil) {
+                                    chatDialogToUpdate.photo = message.dialog.photo;
+                                }
+                                if ([message.dialog.occupantIDs count] > 0) {
+                                    chatDialogToUpdate.occupantIDs = message.dialog.occupantIDs;
+                                }
+                            }
+                            // new custom parameters handling
+                            else if (message.dialogUpdateType != QMDialogUpdateTypeNone) {
+                                
+                                NSDate *updatedAt = nil;
+                                if (message.deletedOccupantsIDs.count > 0) {
+                                    // using date sent of message due to dialogUpdatedAt being not server synchronized when user is leaving
+                                    updatedAt = message.dateSent;
+                                }
+                                else {
+                                    
+                                    updatedAt = message.dialogUpdatedAt;
+                                }
+                                
+                                if ([chatDialogToUpdate.updatedAt compare:updatedAt] == NSOrderedAscending) {
+                                    
+                                    switch (message.dialogUpdateType) {
+                                        case QMDialogUpdateTypeName:
+                                            chatDialogToUpdate.name = message.dialogName;
+                                            break;
+                                            
+                                        case QMDialogUpdateTypePhoto:
+                                            chatDialogToUpdate.photo = message.dialogPhoto;
+                                            break;
+                                            
+                                        case QMDialogUpdateTypeOccupants:
+                                            chatDialogToUpdate.occupantIDs = message.currentOccupantsIDs;
+                                            break;
+                                            
+                                        default:
+                                            break;
+                                    }
+                                    
+                                    chatDialogToUpdate.updatedAt = updatedAt;
+                                }
+                            }
+                            
+                            if (message.senderID != [QBSession currentSession].currentUser.ID) {
+                                chatDialogToUpdate.unreadMessagesCount++;
+                            }
+                            
+                            if ([self.multicastDelegate respondsToSelector:@selector(chatService:didUpdateChatDialogInMemoryStorage:)]) {
+                                [self.multicastDelegate chatService:self didUpdateChatDialogInMemoryStorage:chatDialogToUpdate];
+                            }
+                        }
+                    }
+                    else if (message.messageType == QMMessageTypeContactRequest ||
+                             message.messageType == QMMessageTypeAcceptContactRequest ||
+                             message.messageType == QMMessageTypeRejectContactRequest ||
+                             message.messageType == QMMessageTypeDeleteContactRequest) {
+                        
+                        if (chatDialogToUpdate != nil) {
+                            chatDialogToUpdate.unreadMessagesCount++;
+                            
+                            if ([self.multicastDelegate respondsToSelector:@selector(chatService:didUpdateChatDialogInMemoryStorage:)]) {
+                                [self.multicastDelegate chatService:self didUpdateChatDialogInMemoryStorage:chatDialogToUpdate];
+                            }
+                        }
+                        else {
+                            chatDialogToUpdate = [[QBChatDialog alloc] initWithDialogID:message.dialogID type:QBChatDialogTypePrivate];
+                            chatDialogToUpdate.occupantIDs = @[@([self.serviceManager currentUser].ID), @(message.senderID)];
+                            
+                            [self updateParamsForQBChatDialog:chatDialogToUpdate withQBChatMessage:message];
+                            
+                            chatDialogToUpdate.unreadMessagesCount++;
+                            
+                            [self.dialogsMemoryStorage addChatDialog:chatDialogToUpdate andJoin:NO completion:nil];
+                            
+                            if ([self.multicastDelegate respondsToSelector:@selector(chatService:didAddChatDialogToMemoryStorage:)]) {
+                                [self.multicastDelegate chatService:self didAddChatDialogToMemoryStorage:chatDialogToUpdate];
+                            }
+                        }
+                    }
+                    
+                    if ([message.saveToHistory isEqualToString:kChatServiceSaveToHistoryTrue]) {
+                        
+                        BOOL messageExists = [self.messagesMemoryStorage isMessageExistent:message forDialogID:message.dialogID];
+                        
+                        [self.messagesMemoryStorage addMessage:message forDialogID:message.dialogID];
+                        
+                        if (messageExists) {
+                            
+                            if ([self.multicastDelegate respondsToSelector:@selector(chatService:didUpdateMessage:forDialogID:)]) {
+                                
+                                [self.multicastDelegate chatService:self didUpdateMessage:message forDialogID:message.dialogID];
+                            }
+                        }
+                        else {
+                            
+                            if ([self.multicastDelegate respondsToSelector:@selector(chatService:didAddMessageToMemoryStorage:forDialogID:)]) {
+                                
+                                [self.multicastDelegate chatService:self didAddMessageToMemoryStorage:message forDialogID:message.dialogID];
+                            }
+                        }
+                    }
+                    
+                    if (message.isNotificatonMessage && chatDialogToUpdate != nil) {
+                        
+                        if ([self.multicastDelegate respondsToSelector:@selector(chatService:didReceiveNotificationMessage:createDialog:)]) {
+                            
+                            [self.multicastDelegate chatService:self didReceiveNotificationMessage:message createDialog:chatDialogToUpdate];
+                        }
+                    }
+                    break;
+                    
+                }
+            }
+            
+            
+            
+        } errorBlock:^(QBResponse *response) {
+            //NSLog(response);
+        }];
+        
+       NSLog(@"Need update this case %@", message);
+        
+       // return;
+    }else{
+    //message.dialogID
     QBChatDialog *chatDialogToUpdate = [self.dialogsMemoryStorage chatDialogWithID:message.dialogID];
     
     [self updateParamsForQBChatDialog:chatDialogToUpdate withQBChatMessage:message];
@@ -529,6 +752,7 @@ static NSString* const kQMChatServiceDomain = @"com.q-municate.chatservice";
             
             [self.multicastDelegate chatService:self didReceiveNotificationMessage:message createDialog:chatDialogToUpdate];
         }
+    }
     }
 }
 
@@ -1075,6 +1299,103 @@ static NSString* const kQMChatServiceDomain = @"com.q-municate.chatservice";
         }
     }];
 }
+- (void)sendMessage2:(QBChatMessage *)message
+               type:(QMMessageType)type
+           toDialog:(QBChatDialog *)dialog
+      saveToHistory:(BOOL)saveToHistory
+      saveToStorage:(BOOL)saveToStorage
+         completion:(QBChatCompletionBlock)completion
+{
+    message.dateSent = [NSDate date];
+    
+    //Save to history
+    if (saveToHistory) {
+        message.saveToHistory = kChatServiceSaveToHistoryTrue;
+    }
+    //Set message type
+    if (type != QMMessageTypeText) {
+        message.messageType = type;
+    }
+    
+    QBUUser *currentUser = self.serviceManager.currentUser;
+    
+    if (dialog.type == QBChatDialogTypePrivate) {
+        message.recipientID = dialog.recipientID;
+        message.markable = YES;
+    }
+    
+    message.senderID = message.senderID;
+    message.dialogID = dialog.ID;
+    
+    __weak __typeof(self)weakSelf = self;
+    [dialog sendMessage:message completionBlock:^(NSError *error) {
+        
+        __typeof(weakSelf)strongSelf = weakSelf;
+        
+        // there is a case when message that was returned from server (Group dialogs)
+        // will be handled faster then this completion block been fired
+        // therefore there is no need to add local message to memory storage, while server
+        // up-to-date one is already there
+        BOOL messageExists = [strongSelf.messagesMemoryStorage isMessageExistent:message forDialogID:message.dialogID];
+        
+        if (error == nil && !messageExists && saveToStorage) {
+            
+            [strongSelf.messagesMemoryStorage addMessage:message forDialogID:dialog.ID];
+            
+            if ([strongSelf.multicastDelegate respondsToSelector:@selector(chatService:didAddMessageToMemoryStorage:forDialogID:)]) {
+                [strongSelf.multicastDelegate chatService:strongSelf didAddMessageToMemoryStorage:message forDialogID:dialog.ID];
+            }
+            
+            [strongSelf updateParamsForQBChatDialog:dialog withQBChatMessage:message];
+            
+            if ([strongSelf.multicastDelegate respondsToSelector:@selector(chatService:didUpdateChatDialogInMemoryStorage:)]) {
+                [strongSelf.multicastDelegate chatService:strongSelf didUpdateChatDialogInMemoryStorage:dialog];
+            }
+        }
+        
+        if (completion) completion(error);
+    }];
+}
+- (void)sendMessage2:(QBChatMessage *)message
+         toDialogID:(NSString *)dialogID
+      saveToHistory:(BOOL)saveToHistory
+      saveToStorage:(BOOL)saveToStorage
+         completion:(QBChatCompletionBlock)completion
+{
+    NSCParameterAssert(dialogID);
+    QBChatDialog *dialog = [self.dialogsMemoryStorage chatDialogWithID:dialogID];
+    NSAssert(dialog != nil, @"Dialog have to be in memory cache!");
+    
+    [self sendMessage2:message toDialog:dialog saveToHistory:saveToHistory saveToStorage:saveToStorage completion:completion];
+}
+
+- (void)sendMessage2:(QBChatMessage *)message
+           toDialog:(QBChatDialog *)dialog
+      saveToHistory:(BOOL)saveToHistory
+      saveToStorage:(BOOL)saveToStorage
+         completion:(QBChatCompletionBlock)completion
+{
+    NSAssert(message.messageType == QMMessageTypeText, @"You can only send text messages with this method.");
+    
+    [self sendMessage2:message type:QMMessageTypeText toDialog:dialog saveToHistory:saveToHistory saveToStorage:saveToStorage completion:completion];
+}
+
+- (void)sendAttachmentMessage2:(QBChatMessage *)attachmentMessage
+                     toDialog:(QBChatDialog *)dialog
+          withAttachmentImage:(UIImage *)image
+                   completion:(QBChatCompletionBlock)completion
+{
+    [self.chatAttachmentService uploadAndSendAttachmentMessage:attachmentMessage toDialog:dialog withChatService:self withAttachedImage:image completion:completion];
+    
+    [self.messagesMemoryStorage addMessage:attachmentMessage forDialogID:dialog.ID];
+    if ([self.multicastDelegate respondsToSelector:@selector(chatService:didAddMessageToMemoryStorage:forDialogID:)]) {
+        
+        [self.multicastDelegate chatService:self didAddMessageToMemoryStorage:attachmentMessage forDialogID:dialog.ID];
+        
+    }
+}
+
+
 
 #pragma mark - Send messages
 

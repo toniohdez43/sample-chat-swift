@@ -79,7 +79,7 @@ class DialogTableViewCellModel: NSObject {
 class DialogsViewController: UITableViewController, QMChatServiceDelegate, QMChatConnectionDelegate, QBChatDelegate {
     
     private var didEnterBackgroundDate: NSDate?
-    
+    var presenceStatus="Online"
     // MARK: - ViewController overrides
     
     override func awakeFromNib() {
@@ -110,11 +110,22 @@ class DialogsViewController: UITableViewController, QMChatServiceDelegate, QMCha
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
+        QBChat.instance().addDelegate(self)
+        
         print(QBChat.instance().contactList!.contacts)
         print(QBChat.instance().contactList!.pendingApproval)
+        //self.chatDidReceiveAcceptContactRequestFromUser(12505741)
         self.tableView.reloadData()
     }
+    // MARK: QBChatDelegate
+    
+    func chatDidReceivePresenceWithStatus(status: String, fromUser userID: Int) {
+        /*AlertView(title: "\(userID)", message: "\(status)", cancelButtonTitle: "Cancel", otherButtonTitle: ["OK"], didClick: {(buttonIndex: Int)->
+            Void in
+        })*/
+    }
     func chatDidReceiveContactAddRequestFromUser(userID: UInt) {
+        print("solicitud de amistad recibida")
         AlertViewWithTextField(title: "Solicitud de amistad", message: "De \(userID)", showOver: self, didClickOk: { (text) -> Void in
             
             QBChat.instance().confirmAddContactRequest(userID, completion: { (error: NSError?) -> Void in
@@ -139,7 +150,7 @@ class DialogsViewController: UITableViewController, QMChatServiceDelegate, QMCha
         })
     }
     func chatDidReceiveRejectContactRequestFromUser(userID: UInt) {
-        AlertView(title: "Solicitud Aceptada", message: "De \(userID)", cancelButtonTitle: "Cancel", otherButtonTitle: ["OK"], didClick: {(buttonIndex: Int)->
+        AlertView(title: "Solicitud Rechazada", message: "De \(userID)", cancelButtonTitle: "Cancel", otherButtonTitle: ["OK"], didClick: {(buttonIndex: Int)->
             Void in
         })
 
@@ -198,7 +209,7 @@ class DialogsViewController: UITableViewController, QMChatServiceDelegate, QMCha
 				NSNotificationCenter.defaultCenter().removeObserver(strongSelf)
 				ServicesManager.instance().chatService.removeDelegate(strongSelf)
 				strongSelf.navigationController?.popViewControllerAnimated(true)
-				
+				QBChat.instance().sendPresenceWithStatus("I am offline")
 				SVProgressHUD.showSuccessWithStatus("SA_STR_COMPLETED".localized)
 			}
         }
@@ -364,6 +375,7 @@ class DialogsViewController: UITableViewController, QMChatServiceDelegate, QMCha
 		})
 		
     }
+   
 	
     override func tableView(tableView: UITableView, titleForDeleteConfirmationButtonForRowAtIndexPath indexPath: NSIndexPath) -> String? {
         return "SA_STR_DELETE".localized
@@ -410,10 +422,22 @@ class DialogsViewController: UITableViewController, QMChatServiceDelegate, QMCha
     
     func chatServiceChatDidAccidentallyDisconnect(chatService: QMChatService) {
         SVProgressHUD.showErrorWithStatus("SA_STR_DISCONNECTED".localized)
+        //QBChat.instance().sendPresenceWithStatus("I am offline")
+        
     }
     
     func chatServiceChatDidConnect(chatService: QMChatService) {
         SVProgressHUD.showSuccessWithStatus("SA_STR_CONNECTED".localized)
+        //QBChat.instance().sendPresenceWithStatus("\(QBSession.currentSession().currentUser?.status)")
+        if presenceStatus == "Online"
+        {
+            QBChat.instance().sendPresenceWithStatus("Away")
+            presenceStatus = "Away"
+        }
+        else{
+            QBChat.instance().sendPresenceWithStatus("Online")
+            presenceStatus = "Online"
+        }
         self.getDialogs()
     }
     

@@ -16,6 +16,8 @@ class UsersListTableViewController: UITableViewController {
         super.viewDidLoad()
 		self.retrieveAllUsersFromPage(1)
         
+       
+        
         // Fetching users from cache.
         /*ServicesManager.instance().usersService.loadFromCache().continueWithBlock { [weak self] (task : BFTask!) -> AnyObject! in
             if task.result!.count > 0 {
@@ -59,7 +61,17 @@ class UsersListTableViewController: UITableViewController {
             var userNumber:Int=0
             userNumber += (users?.count)!
             print(self.users)
-            self.users=users!
+            var contacts = QBChat.instance().contactList!.contacts
+            for contact in contacts!{
+                for user in users!{
+                    if contact.userID==user.ID
+                    {
+                        self.users.append(user)
+                        break;
+                    }
+                }
+            }
+            //self.users=users!
             print(self.users)
             self.tableView.reloadData()
             //if pageInformation?.totalEntries > userNumber{
