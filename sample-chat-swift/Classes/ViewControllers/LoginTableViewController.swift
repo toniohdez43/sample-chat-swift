@@ -178,7 +178,9 @@ class LoginTableViewController: UITableViewController, NotificationServiceDelega
 			
 			self.registerForRemoteNotification()
 			self.performSegueWithIdentifier("SA_STR_SEGUE_GO_TO_DIALOGS".localized, sender: nil)
+           //QBChat.instance().sendPresenceWithStatus("I am online")
 			SVProgressHUD.showSuccessWithStatus("SA_STR_LOGGED_IN".localized)
+            //QBChat.instance().sendPresenceWithStatus("I am online")
 			
         })
     }
@@ -236,7 +238,7 @@ class LoginTableViewController: UITableViewController, NotificationServiceDelega
                     }
                     }, errorBlock: { (response:QBResponse) in
                         self.logInChatWithUser(user!)
-                        QBChat.instance().sendPresenceWithStatus("I am online")
+                        
                 })
                 
                 
@@ -269,7 +271,7 @@ class LoginTableViewController: UITableViewController, NotificationServiceDelega
                         }
                         }, errorBlock: { (response:QBResponse) in
                             self.logInChatWithUser(user)
-                            QBChat.instance().sendPresenceWithStatus("I am online")
+                            
                     })
                     
                     

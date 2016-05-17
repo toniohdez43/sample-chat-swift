@@ -586,11 +586,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "sample-chat-swift/Classes/ViewControllers/ChatViewController.swift"
-            timestampString = "485046733.310267"
+            timestampString = "485136498.07017"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "821"
-            endingLineNumber = "821"
+            startingLineNumber = "822"
+            endingLineNumber = "822"
             landmarkName = "attributedLabel(_:didSelectLinkWithURL:)"
             landmarkType = "5">
          </BreakpointContent>
@@ -602,11 +602,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "sample-chat-swift/Classes/ViewControllers/ChatViewController.swift"
-            timestampString = "485046983.965795"
+            timestampString = "485136498.07017"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "814"
-            endingLineNumber = "814"
+            startingLineNumber = "815"
+            endingLineNumber = "815"
             landmarkName = "chatCellDidTapContainer(_:)"
             landmarkType = "5">
          </BreakpointContent>

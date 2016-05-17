@@ -9,14 +9,15 @@
  
  class NewDialogViewController: UsersListTableViewController, QMChatServiceDelegate, QMChatConnectionDelegate {
     var dialog: QBChatDialog?
-    
+    var allUsers: [QBUUser]?
     @IBAction func addContact(sender: AnyObject) {
         var userContact = QBUUser()
+        self.retrieveAllUsers(1)
         AlertViewWithTextField(title: "Nombre de Contacto", message: nil, showOver:self, didClickOk: { (text) -> Void in
             
             let userName = text
             
-            for usuario in self.users
+            for usuario in self.allUsers!
             {
                 if usuario.login == userName
                 {
@@ -36,6 +37,25 @@
             // cancel
             (sender as! UIBarButtonItem).enabled = true
         }
+        
+    }
+    func retrieveAllUsers(page:UInt){
+        let pag = QBGeneralResponsePage(currentPage: page,perPage: 100)
+        QBRequest.usersForPage(pag, successBlock: { (response: QBResponse, pageInformation:QBGeneralResponsePage? , users: [QBUUser]?) in
+            var userNumber:Int=0
+            userNumber += (users?.count)!
+            print(self.users)
+            self.allUsers=users
+            //self.users=users!
+            
+            //if pageInformation?.totalEntries > userNumber{
+            //self.retrieveAllUsersFromPage((pageInformation?.totalEntries)!+1)
+            //}
+        }) { (response: QBResponse) in
+            print(response)
+            
+        }
+        
         
     }
     func chatContactListDidChange(contactList: QBContactList!) {

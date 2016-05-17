@@ -77,7 +77,7 @@ class DialogTableViewCellModel: NSObject {
 }
 
 class DialogsViewController: UITableViewController, QMChatServiceDelegate, QMChatConnectionDelegate, QBChatDelegate {
-    
+    var users: [QBUUser]?
     private var didEnterBackgroundDate: NSDate?
     var presenceStatus="Online"
     // MARK: - ViewController overrides
@@ -111,22 +111,73 @@ class DialogsViewController: UITableViewController, QMChatServiceDelegate, QMCha
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         QBChat.instance().addDelegate(self)
-        
+        retrieveAllUsers(1)
         print(QBChat.instance().contactList!.contacts)
         print(QBChat.instance().contactList!.pendingApproval)
         //self.chatDidReceiveAcceptContactRequestFromUser(12505741)
         self.tableView.reloadData()
+        //QBChat.instance().sendPresenceWithStatus("I am online")
     }
     // MARK: QBChatDelegate
-    
+    func getUserLogin(id:Int) -> String
+    {
+        var login = ""
+        
+        for usuario in self.users!
+        {
+            if usuario.ID == UInt(id)
+            {
+                 login = usuario.login!
+                 break;
+            }
+            
+        }
+        return login
+       
+    }
+    func getUserLoginU(id:UInt) -> String
+    {
+        var login = ""
+        
+        for usuario in self.users!
+        {
+            if usuario.ID == id
+            {
+                login = usuario.login!
+                break;
+            }
+            
+        }
+        return login
+        
+    }
+    func retrieveAllUsers(page:UInt){
+        let pag = QBGeneralResponsePage(currentPage: page,perPage: 100)
+        QBRequest.usersForPage(pag, successBlock: { (response: QBResponse, pageInformation:QBGeneralResponsePage? , users: [QBUUser]?) in
+            
+            self.users=users
+            //self.users=users!
+            
+            //if pageInformation?.totalEntries > userNumber{
+            //self.retrieveAllUsersFromPage((pageInformation?.totalEntries)!+1)
+            //}
+        }) { (response: QBResponse) in
+            print(response)
+            
+        }
+        
+        
+    }
     func chatDidReceivePresenceWithStatus(status: String, fromUser userID: Int) {
         /*AlertView(title: "\(userID)", message: "\(status)", cancelButtonTitle: "Cancel", otherButtonTitle: ["OK"], didClick: {(buttonIndex: Int)->
             Void in
         })*/
+        TWMessageBarManager.sharedInstance().hideAll()
+        TWMessageBarManager.sharedInstance().showMessageWithTitle("\(userID)", description: status, type: TWMessageBarMessageType.Info)
     }
     func chatDidReceiveContactAddRequestFromUser(userID: UInt) {
         print("solicitud de amistad recibida")
-        AlertViewWithTextField(title: "Solicitud de amistad", message: "De \(userID)", showOver: self, didClickOk: { (text) -> Void in
+        AlertViewWithTextField(title: "Solicitud de amistad", message: "De "+getUserLoginU(userID), showOver: self, didClickOk: { (text) -> Void in
             
             QBChat.instance().confirmAddContactRequest(userID, completion: { (error: NSError?) -> Void in
                 print(error)
@@ -145,12 +196,12 @@ class DialogsViewController: UITableViewController, QMChatServiceDelegate, QMCha
 
     }
     func chatDidReceiveAcceptContactRequestFromUser(userID: UInt) {
-        AlertView(title: "Solicitud Aceptada", message: "De \(userID)", cancelButtonTitle: "Cancel", otherButtonTitle: ["OK"], didClick: {(buttonIndex: Int)->
+        AlertView(title: "Solicitud Aceptada", message: "De "+getUserLoginU(userID), cancelButtonTitle: "Cancel", otherButtonTitle: ["OK"], didClick: {(buttonIndex: Int)->
             Void in
         })
     }
     func chatDidReceiveRejectContactRequestFromUser(userID: UInt) {
-        AlertView(title: "Solicitud Rechazada", message: "De \(userID)", cancelButtonTitle: "Cancel", otherButtonTitle: ["OK"], didClick: {(buttonIndex: Int)->
+        AlertView(title: "Solicitud Rechazada", message: "De "+getUserLoginU(userID), cancelButtonTitle: "Cancel", otherButtonTitle: ["OK"], didClick: {(buttonIndex: Int)->
             Void in
         })
 
@@ -179,7 +230,7 @@ class DialogsViewController: UITableViewController, QMChatServiceDelegate, QMCha
     }
     
     @IBAction func logoutAction() {
-        
+        QBChat.instance().sendPresenceWithStatus("I am offline")
         SVProgressHUD.showWithStatus("SA_STR_LOGOUTING".localized, maskType: SVProgressHUDMaskType.Clear)
         
         let logoutGroup = dispatch_group_create()
@@ -209,7 +260,7 @@ class DialogsViewController: UITableViewController, QMChatServiceDelegate, QMCha
 				NSNotificationCenter.defaultCenter().removeObserver(strongSelf)
 				ServicesManager.instance().chatService.removeDelegate(strongSelf)
 				strongSelf.navigationController?.popViewControllerAnimated(true)
-				QBChat.instance().sendPresenceWithStatus("I am offline")
+				
 				SVProgressHUD.showSuccessWithStatus("SA_STR_COMPLETED".localized)
 			}
         }
@@ -431,12 +482,14 @@ class DialogsViewController: UITableViewController, QMChatServiceDelegate, QMCha
         //QBChat.instance().sendPresenceWithStatus("\(QBSession.currentSession().currentUser?.status)")
         if presenceStatus == "Online"
         {
-            QBChat.instance().sendPresenceWithStatus("Away")
             presenceStatus = "Away"
+            QBChat.instance().sendPresenceWithStatus(presenceStatus)
+            
         }
         else{
-            QBChat.instance().sendPresenceWithStatus("Online")
             presenceStatus = "Online"
+            QBChat.instance().sendPresenceWithStatus(presenceStatus)
+            
         }
         self.getDialogs()
     }

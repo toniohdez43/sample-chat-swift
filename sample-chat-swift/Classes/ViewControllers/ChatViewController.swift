@@ -448,7 +448,7 @@ class ChatViewController: QMChatViewController, QMChatServiceDelegate, UIActionS
         var attributes = Dictionary<String, AnyObject>()
         var str = messageItem.text!
         //str=str.substringWithRange(Range<String.Index>(start: str.startIndex, end: str.endIndex.advancedBy(-1)))
-        if(str.rangeOfString("https://www.") != nil||str.rangeOfString("http://www.") != nil){
+        if(str.rangeOfString("https://") != nil||str.rangeOfString("http://") != nil){
             attributes[NSLinkAttributeName]=NSURL(string: messageItem.text!)
         //UIApplication.sharedApplication().openURL(NSURL(string: messageItem.text!)!)
             
@@ -517,14 +517,15 @@ class ChatViewController: QMChatViewController, QMChatServiceDelegate, UIActionS
         if messageItem.senderID == self.senderID {
             text = text + "\n" + self.statusStringFromMessage(messageItem)
         }
+        if messageItem.text != nil{
         var str = messageItem.text!
         if(str.rangeOfString("https://www.") != nil||str.rangeOfString("http://www.") != nil){
             attributes[NSLinkAttributeName]=NSURL(string: messageItem.text!)
             //UIApplication.sharedApplication().openURL(NSURL(string: messageItem.text!)!)
             
         }
-        
-        let bottomLabelAttributedString = NSAttributedString(string: messageItem.text!, attributes: attributes)
+        }
+        let bottomLabelAttributedString = NSAttributedString(string: text, attributes: attributes)
         
         return bottomLabelAttributedString
     }
